@@ -1,0 +1,385 @@
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Library Management System</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+<!-- AUTHENTICATION -->
+<section id="authScreen" class="auth-screen">
+    <div class="auth-card">
+        <div class="auth-logo">📚</div>
+        <h1>Library System</h1>
+        <p class="muted">Public Library Management System</p>
+
+        <div class="auth-tabs">
+            <button class="auth-tab active" data-auth="login">Sign In</button>
+            <button class="auth-tab" data-auth="signup">Sign Up</button>
+        </div>
+
+        <form id="loginForm">
+            <label>Email</label>
+            <input name="email" type="email" required placeholder="Enter your email">
+
+            <label>Password</label>
+            <input name="password" type="password" required placeholder="Enter your password">
+
+            <button class="btn primary full" type="submit">Sign In</button>
+        </form>
+
+        <form id="signupForm" hidden>
+            <label>Full Name</label>
+            <input name="name" required placeholder="Enter your name">
+
+            <label>Email</label>
+            <input name="email" type="email" required placeholder="Enter your email">
+
+            <label>Password</label>
+            <input name="password" type="password" minlength="6" required placeholder="At least 6 characters">
+
+            <label>Confirm Password</label>
+            <input name="confirm" type="password" minlength="6" required placeholder="Confirm password">
+
+            <button class="btn primary full" type="submit">Create Account</button>
+        </form>
+
+        <p class="auth-message" id="authMessage"></p>
+        <p class="muted small">Educational demonstration version</p>
+    </div>
+</section>
+
+<!-- MAIN APPLICATION -->
+<div id="app" hidden>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-icon">📚</span>
+            <div>
+                <h2>My Library</h2>
+                <small>Management System</small>
+            </div>
+        </div>
+
+        <nav id="navigation">
+            <button class="nav-link active" data-page="dashboard">▦ <span data-i18n="dashboard">Dashboard</span></button>
+            <button class="nav-link" data-page="books">▤ <span data-i18n="books">Books</span></button>
+            <button class="nav-link" data-page="members">♙ <span data-i18n="members">Members</span></button>
+            <button class="nav-link" data-page="loans">⇄ <span data-i18n="loans">Loans</span></button>
+            <button class="nav-link" data-page="reservations">▣ <span data-i18n="reservations">Reservations</span></button>
+            <button class="nav-link" data-page="fines">＄ <span data-i18n="fines">Fines</span></button>
+        </nav>
+
+        <div class="sidebar-user">
+            <div class="avatar" id="userAvatar">A</div>
+            <div class="user-info">
+                <b id="currentUser">Admin</b>
+                <small id="currentRole">Librarian</small>
+            </div>
+            <button id="logoutBtn" title="Sign Out">↪</button>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">PUBLIC LIBRARY MANAGEMENT SYSTEM</p>
+                <h1 id="pageTitle">Dashboard</h1>
+            </div>
+
+            <div class="top-actions">
+                <button id="languageBtn" class="btn light">AR العربية</button>
+                <button id="themeBtn" class="btn light">🌙 Dark Mode</button>
+                <span id="today"></span>
+            </div>
+        </header>
+
+        <!-- DASHBOARD -->
+        <section class="page active" id="dashboardPage">
+
+            <div class="welcome">
+                <div>
+                    <h2 data-i18n="welcome">Welcome to the Library Management System</h2>
+                    <p data-i18n="welcomeDesc">Manage books, members and library operations.</p>
+                </div>
+                <span class="welcome-icon">📖</span>
+            </div>
+
+            <div class="stats-grid">
+                <article class="stat-card">
+                    <span data-i18n="totalBooks">Total Books</span>
+                    <strong id="statBooks">0</strong>
+                    <small>▤</small>
+                </article>
+
+                <article class="stat-card">
+                    <span data-i18n="physicalBooks">Physical Books</span>
+                    <strong id="statPhysical">0</strong>
+                    <small>📕</small>
+                </article>
+
+                <article class="stat-card">
+                    <span data-i18n="digitalBooks">Digital Books</span>
+                    <strong id="statDigital">0</strong>
+                    <small>💻</small>
+                </article>
+
+                <article class="stat-card">
+                    <span data-i18n="members">Members</span>
+                    <strong id="statMembers">0</strong>
+                    <small>♙</small>
+                </article>
+
+                <article class="stat-card">
+                    <span data-i18n="activeLoans">Active Loans</span>
+                    <strong id="statLoans">0</strong>
+                    <small>⇄</small>
+                </article>
+            </div>
+
+            <!-- BOOK INVENTORY SUMMARY -->
+            <section class="panel">
+                <div class="panel-heading">
+                    <h3 data-i18n="inventorySummary">Books Inventory Summary</h3>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-i18n="bookType">Book Type</th>
+                                <th data-i18n="totalCopies">Total Copies</th>
+                                <th data-i18n="borrowed">Borrowed</th>
+                                <th data-i18n="available">Available</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventorySummary"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-heading">
+                    <h3 data-i18n="recentLoans">Recent Loans</h3>
+                    <button class="text-btn" data-go="loans">View All →</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th data-i18n="member">Member</th>
+                                <th data-i18n="book">Book</th>
+                                <th data-i18n="dueDate">Due Date</th>
+                                <th data-i18n="status">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentLoans"></tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+
+        <!-- BOOKS -->
+        <section class="page" id="booksPage">
+
+            <div class="section-toolbar">
+                <div>
+                    <h2 data-i18n="bookManagement">Book Management</h2>
+                    <p data-i18n="bookDesc">Manage physical and digital books.</p>
+                </div>
+                <button class="btn primary" id="addBookBtn">+ <span data-i18n="addBook">Add Book</span></button>
+            </div>
+
+            <div class="book-tabs">
+                <button class="book-tab active" data-type="physical">📕 <span data-i18n="physical">Physical Books</span></button>
+                <button class="book-tab" data-type="digital">💻 <span data-i18n="digital">Digital Books</span></button>
+            </div>
+
+            <div class="filters">
+                <input id="bookSearch" placeholder="Search by title, author, ISBN or ID...">
+                <select id="bookCategoryFilter">
+                    <option value="">All Categories</option>
+                </select>
+            </div>
+
+            <div class="panel table-panel">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-i18n="image">Image</th>
+                                <th>ID</th>
+                                <th data-i18n="title">Title</th>
+                                <th data-i18n="author">Author</th>
+                                <th data-i18n="category">Category</th>
+                                <th data-i18n="isbn">ISBN</th>
+                                <th data-i18n="availability">Availability</th>
+                                <th data-i18n="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="booksTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- MEMBERS -->
+        <section class="page" id="membersPage">
+            <div class="section-toolbar">
+                <div>
+                    <h2 data-i18n="memberManagement">Member Management</h2>
+                    <p data-i18n="memberDesc">Manage registered library members.</p>
+                </div>
+                <button class="btn primary" id="addMemberBtn">+ <span data-i18n="addMember">Add Member</span></button>
+            </div>
+
+            <div class="filters">
+                <input id="memberSearch" placeholder="Search by Member ID, name, email or phone...">
+            </div>
+
+            <div class="panel table-panel">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-i18n="memberId">Member ID</th>
+                                <th data-i18n="name">Name</th>
+                                <th data-i18n="email">Email</th>
+                                <th data-i18n="phone">Phone</th>
+                                <th data-i18n="joined">Joined</th>
+                                <th data-i18n="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="membersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- LOANS -->
+        <section class="page" id="loansPage">
+            <div class="section-toolbar">
+                <div>
+                    <h2 data-i18n="loanManagement">Loan Management</h2>
+                    <p data-i18n="loanDesc">Borrow and return physical and digital books.</p>
+                </div>
+                <button class="btn primary" id="addLoanBtn">+ <span data-i18n="newLoan">New Loan</span></button>
+            </div>
+
+            <div class="filters">
+                <input id="loanSearch" placeholder="Search by loan ID, member or book...">
+                <select id="loanStatusFilter">
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="returned">Returned</option>
+                    <option value="overdue">Overdue</option>
+                </select>
+            </div>
+
+            <div class="panel table-panel">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th data-i18n="member">Member</th>
+                                <th data-i18n="book">Book</th>
+                                <th data-i18n="borrowDate">Borrow Date</th>
+                                <th data-i18n="dueDate">Due Date</th>
+                                <th data-i18n="status">Status</th>
+                                <th data-i18n="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="loansTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESERVATIONS -->
+        <section class="page" id="reservationsPage">
+            <div class="section-toolbar">
+                <div>
+                    <h2 data-i18n="reservations">Reservations</h2>
+                    <p data-i18n="reservationDesc">Manage book reservations.</p>
+                </div>
+                <button class="btn primary" id="addReservationBtn">+ <span data-i18n="newReservation">New Reservation</span></button>
+            </div>
+
+            <div class="panel table-panel">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th data-i18n="member">Member</th>
+                                <th data-i18n="book">Book</th>
+                                <th data-i18n="date">Date</th>
+                                <th data-i18n="status">Status</th>
+                                <th data-i18n="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reservationsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- FINES -->
+        <section class="page" id="finesPage">
+            <div class="section-toolbar">
+                <div>
+                    <h2 data-i18n="fines">Fines</h2>
+                    <p data-i18n="fineDesc">Manage overdue book payments.</p>
+                </div>
+            </div>
+
+            <div class="panel table-panel">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th data-i18n="loanId">Loan ID</th>
+                                <th data-i18n="member">Member</th>
+                                <th data-i18n="amount">Amount</th>
+                                <th data-i18n="status">Status</th>
+                                <th data-i18n="date">Payment Date</th>
+                                <th data-i18n="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="finesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <footer>Public Library Management System © 2026</footer>
+    </main>
+</div>
+
+<!-- DYNAMIC FORM -->
+<dialog id="appDialog">
+    <form id="dialogForm">
+        <div class="modal-head">
+            <h2 id="dialogTitle">Add</h2>
+            <button type="button" id="closeDialog" class="close-btn">×</button>
+        </div>
+        <div id="dialogFields" class="form-fields"></div>
+        <div class="modal-actions">
+            <button type="button" class="btn light" id="cancelDialog">Cancel</button>
+            <button type="submit" class="btn primary">Save</button>
+        </div>
+    </form>
+</dialog>
+
+<div id="toast" class="toast"></div>
+
+</body>
+</html>
